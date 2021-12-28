@@ -1,0 +1,22 @@
+{
+  "name": "task-manager",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node ./dist/mongodb.js",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/mongodb": "^4.0.7",
+    "esm": "^3.2.25",
+    "mongodb": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "jest": "^27.4.5"
+  }
+}
