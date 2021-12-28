@@ -42,6 +42,39 @@ app.get("/users/:id", async (req, res) => {
     }
 })
 
+app.patch("/users/:id", async (req, res) => {
+    const updates = Object.keys(req.body)
+    const allowedUpdates = ['firstName', 'surname', 'age', 'password']
+    const isValidUpdate = updates.every((item) => allowedUpdates.includes(item))
+
+    if(!isValidUpdate) {
+        return res.status(400).send("error: Invalid updates!")
+    }
+
+    try {
+        const result = await UserDto.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+        if(!result) {
+            return res.status(404).send()
+        }
+        res.send(result)
+    } catch(error) {
+        console.log(error)
+        res.status(500).send(error)
+    }
+})
+
+app.delete("/users/:id", async (req, res) => {
+    try{
+        const result = await UserDto.findByIdAndDelete(req.params.id)
+        if(!result) {
+            return res.status(404).send()
+        }
+        res.send(result)
+    } catch(error) {
+        res.status(500).send(error)
+    }
+})
+
 app.post("/tasks", async (req, res) => {
     const task = new TaskDto(req.body)
 
@@ -71,6 +104,39 @@ app.get("/tasks/:id", async (req, res) => {
         res.send(result)
     } catch (error) {
         res.status(500).send("Unable to retrieve task")
+    }
+})
+
+app.patch("/tasks/:id", async (req, res) => {
+    const updates = Object.keys(req.body)
+    const allowedUpdates = ['description', 'completed']
+    const isValidUpdate = updates.every((item) => allowedUpdates.includes(item))
+
+    if(!isValidUpdate) {
+        return res.status(400).send("error: Invalid updates!")
+    }
+
+    try {
+        const result = await TaskDto.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+        if(!result) {
+            return res.status(404).send()
+        }
+        res.send(result)
+    } catch(error) {
+        console.log(error)
+        res.status(500).send(error)
+    }
+})
+
+app.delete("/tasks/:id", async (req, res) => {
+    try{
+        const result = await TaskDto.findByIdAndDelete(req.params.id)
+        if(!result) {
+            return res.status(404).send()
+        }
+        res.send(result)
+    } catch(error) {
+        res.status(500).send(error)
     }
 })
 
