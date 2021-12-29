@@ -45,10 +45,15 @@ TaskRouter.patch("/tasks/:id", async (req, res) => {
     }
 
     try {
-        const result = await TaskDto.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+        const result = await TaskDto.findById(req.params.id)
+        
         if(!result) {
             return res.status(404).send()
         }
+
+        result.description = req.body.description ? req.body.description : result.description
+        result.completed = req.body.completed ? req.body.completed : result.completed
+
         res.send(result)
     } catch(error) {
         console.log(error)

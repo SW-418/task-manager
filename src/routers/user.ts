@@ -46,10 +46,21 @@ UserRouter.patch("/users/:id", async (req, res) => {
     }
 
     try {
-        const result = await UserDto.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+        const result = await UserDto.findById(req.params.id)
+
         if(!result) {
             return res.status(404).send()
         }
+
+        // TODO: There's deffo a more elegant, extendable way to achieve this
+        result.firstName = req.body.firstName ? req.body.firstName : result.firstName 
+        result.surname = req.body.surname ? req.body.surname : result.surname 
+        result.age = req.body.age ? req.body.age : result.age
+        result.email = req.body.email ? req.body.email : result.email
+        result.password = req.body.password ? req.body.password : result.password
+
+        await result.save()
+
         res.send(result)
     } catch(error) {
         console.log(error)

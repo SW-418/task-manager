@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import validator from 'validator'
-import {User} from "../user";
+import {User} from "../user"
+import bcrypt from 'bcryptjs'
 
 const { Schema } = mongoose
 
@@ -35,6 +36,16 @@ const schema = new Schema<User>({
         }
     }
 });
+
+schema.pre('save', async function (next) {
+    const user = this
+
+    if(user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 8)
+    }
+
+    next()
+})
 
 const UserDto = mongoose.model<User>("User", schema)
 
