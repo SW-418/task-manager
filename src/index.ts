@@ -2,9 +2,11 @@ import express from 'express'
 import { createMongoConnection } from "./db/mongoose.js";
 import {UserRouter} from "./routers/user.js";
 import {TaskRouter} from "./routers/tasks.js";
+import { authenticate } from './middleware/authenticate.js';
 
 const app = express()
 const port = process.env.PORT || 3000
+
 createMongoConnection()
 
 app.use(express.json())

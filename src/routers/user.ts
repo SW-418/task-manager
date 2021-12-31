@@ -1,5 +1,7 @@
 import express from 'express'
-import {UserDto} from "../models/dtos/user-dto.js";
+import { authenticate } from '../middleware/authenticate.js';
+import { UserDto } from "../models/dtos/user-dto.js";
+import {ObjectId} from "mongodb";
 
 const UserRouter = express.Router()
 
@@ -8,13 +10,15 @@ UserRouter.post("/users", async (req, res) => {
 
     try {
         await user.save();
-        res.status(201).send(user)
+        const token = await user.generateAuthToken()
+        res.status(201).send({user, token})
     } catch(error) {
         console.log(error)
         res.status(400).send(error)
     }
 })
 
+// DEV ONLY
 UserRouter.get("/users", async (req, res) => {
     try{
         const result = await UserDto.find();
@@ -22,6 +26,10 @@ UserRouter.get("/users", async (req, res) => {
     } catch(error) {
         res.status(500).send("Unable to retrieve users")
     }
+})
+
+UserRouter.get("/users/me", authenticate, async (req, res) => {
+    res.send(req.user)
 })
 
 UserRouter.get("/users/:id", async (req, res) => {
@@ -80,4 +88,45 @@ UserRouter.delete("/users/:id", async (req, res) => {
     }
 })
 
+UserRouter.post("/users/login", async (req, res) => {
+    try {
+        const user = await UserDto.findByCredentials(req.body.email, req.body.password)
+        const token = await user.generateAuthToken()
+        res.send({ user, token })
+    } catch(error) {
+        console.log(error)
+        res.status(400).send()
+    }
+})
+
+UserRouter.post("/users/logout", authenticate, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((current: JWTToken) => current.token != req.token)
+        await req.user.save()
+        res.send()
+    } catch(error) {
+        res.status(500).send("Error occurred trying to log out")
+    }
+})
+
+UserRouter.post("/users/logoutall", authenticate, async (req, res) => {
+    try {
+        req.user.tokens = []
+        await req.user.save()
+        res.send()
+    } catch(error) {
+        res.status(500).send("Error occurred trying to log out")
+    }
+})
+
 export { UserRouter }
+
+class JWTToken {
+    token: string
+    _id: ObjectId
+
+    constructor(token: string, id: ObjectId) {
+        this.token = token;
+        this._id = id;
+    }
+}

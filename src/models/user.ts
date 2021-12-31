@@ -1,15 +1,11 @@
-export class User {
+export interface IUser {
     firstName: string
     surname: string
     age: number
     email: string
     password: string
+    tokens: string[]
 
-    constructor(firstName: string, surname: string, age: number, email: string, password: string) {
-        this.firstName = firstName;
-        this.surname = surname;
-        this.age = age;
-        this.email = email
-        this.password = password
-    }
+    findByCredentials(email: string, password: string): Promise<IUser>
+    generateAuthToken(): Promise<string>
 }
