@@ -1,3 +1,5 @@
+import {PublicUser} from "./public-user";
+
 export interface IUser {
     firstName: string
     surname: string
@@ -8,4 +10,5 @@ export interface IUser {
 
     findByCredentials(email: string, password: string): Promise<IUser>
     generateAuthToken(): Promise<string>
+    getPublicProfile(): PublicUser
 }

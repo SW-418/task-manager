@@ -3,12 +3,14 @@ import jwt from 'jsonwebtoken'
 import validator from 'validator'
 import {IUser} from "../user"
 import bcrypt from 'bcryptjs'
+import {PublicUser} from "../public-user.js";
 
 const { Schema } = mongoose
 
 interface UserModel extends mongoose.Model<IUser> {
     findByCredentials(email: string, password: string): Promise<IUser>
     generateAuthToken(): Promise<string>
+    getPublicProfile(): PublicUser
 }
 
 const schema = new Schema<IUser, UserModel>({
@@ -49,6 +51,18 @@ const schema = new Schema<IUser, UserModel>({
         }
     }]
 });
+
+schema.virtual('Tasks', {
+    ref: "Task",
+    localField: "_id",
+    foreignField: "ownerId"
+})
+
+schema.methods.toJSON = function (): PublicUser {
+    const user = this
+
+    return new PublicUser(user._id.toString(), user)
+}
 
 schema.methods.generateAuthToken = async function (): Promise<string> {
     const user = this
