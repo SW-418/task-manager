@@ -4,6 +4,7 @@ import validator from 'validator'
 import {IUser} from "../user"
 import bcrypt from 'bcryptjs'
 import {PublicUser} from "../public-user.js";
+import {TaskDto} from "./task-dto.js";
 
 const { Schema } = mongoose
 
@@ -100,6 +101,14 @@ schema.pre('save', async function (next) {
     if(user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8)
     }
+
+    next()
+})
+
+schema.pre('remove', async function (next) {
+    const user = this
+    console.log("deleting")
+    await TaskDto.deleteMany({ ownerId: user._id })
 
     next()
 })
