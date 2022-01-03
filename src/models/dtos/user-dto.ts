@@ -51,6 +51,8 @@ const schema = new Schema<IUser, UserModel>({
             required: true
         }
     }]
+}, {
+    timestamps: true
 });
 
 schema.virtual('Tasks', {
