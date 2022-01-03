@@ -1,6 +1,8 @@
 import express from 'express'
 import { TaskDto } from "../models/dtos/task-dto.js";
 import { authenticate } from "../middleware/authenticate.js";
+import {FilterQuery} from "mongoose";
+import {Task} from "../models/task";
 
 const TaskRouter = express.Router()
 
@@ -19,9 +21,22 @@ TaskRouter.post("/tasks", authenticate, async (req, res) => {
 })
 
 TaskRouter.get("/tasks", authenticate, async (req, res) => {
+    const filter:FilterQuery<Task> = { ownerId: req.user._id }
+
+    if(req.query.hasOwnProperty("completed")) {
+        filter.completed = req.query["completed"] === "true"
+    }
+
     try {
-        const result = await TaskDto.find({ ownerId: req.user._id } )
-        res.send(result)
+        const limit = req.query["limit"]
+        const skip = req.query["skip"]
+        if(typeof limit != "string" || typeof skip != "string" ) {
+            res.status(400).send("limit AND skip query parameters must be provided")
+        } else {
+            console.log(`Limit: ${limit} Skip: ${skip}`)
+            const result = await TaskDto.find(filter).limit(parseInt(limit)).skip(parseInt(skip))
+            res.send(result)
+        }
     } catch (error) {
         console.log(error)
         res.status(500).send("Unable to retrieve tasks")
