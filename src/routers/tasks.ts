@@ -27,6 +27,13 @@ TaskRouter.get("/tasks", authenticate, async (req, res) => {
         filter.completed = req.query["completed"] === "true"
     }
 
+    const sortParams:{[key:string]: number} = {}
+    const sortBy = req.query["sortBy"]
+    if(typeof sortBy === "string") {
+        const parts = sortBy.split(":")
+        sortParams[parts[0]] = parts[1] === "desc" ? -1: 1
+    }
+
     try {
         const limit = req.query["limit"]
         const skip = req.query["skip"]
@@ -34,7 +41,7 @@ TaskRouter.get("/tasks", authenticate, async (req, res) => {
             res.status(400).send("limit AND skip query parameters must be provided")
         } else {
             console.log(`Limit: ${limit} Skip: ${skip}`)
-            const result = await TaskDto.find(filter).limit(parseInt(limit)).skip(parseInt(skip))
+            const result = await TaskDto.find(filter).limit(parseInt(limit)).skip(parseInt(skip)).sort(sortParams)
             res.send(result)
         }
     } catch (error) {
