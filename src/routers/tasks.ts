@@ -1,4 +1,4 @@
-import express from 'express'
+import express,{ Request, Response } from 'express'
 import { TaskDto } from "../models/dtos/task-dto.js";
 import { authenticate } from "../middleware/authenticate.js";
 import {FilterQuery} from "mongoose";
@@ -6,7 +6,7 @@ import {Task} from "../models/task";
 
 const TaskRouter = express.Router()
 
-TaskRouter.post("/tasks", authenticate, async (req, res) => {
+TaskRouter.post("/tasks", authenticate, async (req: Request, res: Response) => {
     const task = new TaskDto({
         ...req.body,
         ownerId: req.user._id
@@ -20,7 +20,7 @@ TaskRouter.post("/tasks", authenticate, async (req, res) => {
     }
 })
 
-TaskRouter.get("/tasks", authenticate, async (req, res) => {
+TaskRouter.get("/tasks", authenticate, async (req: Request, res: Response) => {
     const filter:FilterQuery<Task> = { ownerId: req.user._id }
 
     if(req.query.hasOwnProperty("completed")) {
@@ -50,7 +50,7 @@ TaskRouter.get("/tasks", authenticate, async (req, res) => {
     }
 })
 
-TaskRouter.get("/tasks/:id", authenticate, async (req, res) => {
+TaskRouter.get("/tasks/:id", authenticate, async (req: Request, res: Response) => {
     const _id = req.params.id
     try {
         const result = await TaskDto.findOne({ _id, ownerId: req.user._id })
@@ -64,7 +64,7 @@ TaskRouter.get("/tasks/:id", authenticate, async (req, res) => {
     }
 })
 
-TaskRouter.patch("/tasks/:id", authenticate, async (req, res) => {
+TaskRouter.patch("/tasks/:id", authenticate, async (req: Request, res: Response) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['description', 'completed']
     const isValidUpdate = updates.every((item) => allowedUpdates.includes(item))
@@ -90,7 +90,7 @@ TaskRouter.patch("/tasks/:id", authenticate, async (req, res) => {
     }
 })
 
-TaskRouter.delete("/tasks/:id", authenticate, async (req, res) => {
+TaskRouter.delete("/tasks/:id", authenticate, async (req: Request, res: Response) => {
     try{
         const result = await TaskDto.findOneAndDelete({ _id: req.params.id, ownerId: req.user._id})
         if(!result) {

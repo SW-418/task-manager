@@ -1,11 +1,26 @@
-import express from 'express'
-import { authenticate } from '../middleware/authenticate.js';
-import { UserDto } from "../models/dtos/user-dto.js";
-import {ObjectId} from "mongodb";
+import express, {NextFunction, Request, Response} from 'express'
+import {authenticate} from '../middleware/authenticate.js';
+import {UserDto} from "../models/dtos/user-dto.js";
+import {JWTToken} from "../models/JWTToken";
+import multer from "multer"
+import {ErrorResponse} from "../models/error-response.js";
+import sharp from "sharp";
 
 const UserRouter = express.Router()
 
-UserRouter.post("/users", async (req, res) => {
+const multerOptions = multer({
+    limits: {
+        fileSize: 1000000 // Size in bytes
+    },
+    fileFilter(req: Express.Request, file: Express.Multer.File, callback: multer.FileFilterCallback) {
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return callback(new Error("File must have jpg, jpeg or png format"))
+        }
+        callback(null, true)
+    }
+})
+
+UserRouter.post("/users", async (req: Request, res: Response) => {
     const user = new UserDto(req.body)
 
     try {
@@ -18,21 +33,11 @@ UserRouter.post("/users", async (req, res) => {
     }
 })
 
-// DEV ONLY
-UserRouter.get("/users", async (req, res) => {
-    try{
-        const result = await UserDto.find();
-        res.send(result)
-    } catch(error) {
-        res.status(500).send("Unable to retrieve users")
-    }
-})
-
-UserRouter.get("/users/me", authenticate, async (req, res) => {
+UserRouter.get("/users/me", authenticate, async (req: Request, res: Response) => {
     res.send(req.user)
 })
 
-UserRouter.patch("/users/me", authenticate, async (req, res) => {
+UserRouter.patch("/users/me", authenticate, async (req: Request, res: Response) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['firstName', 'surname', 'age', 'password']
     const isValidUpdate = updates.every((item) => allowedUpdates.includes(item))
@@ -56,7 +61,7 @@ UserRouter.patch("/users/me", authenticate, async (req, res) => {
     }
 })
 
-UserRouter.delete("/users/me", authenticate, async (req, res) => {
+UserRouter.delete("/users/me", authenticate, async (req: Request, res: Response) => {
     try{
         await req.user.remove()
         res.send(req.user)
@@ -65,7 +70,7 @@ UserRouter.delete("/users/me", authenticate, async (req, res) => {
     }
 })
 
-UserRouter.post("/users/login", async (req, res) => {
+UserRouter.post("/users/login", async (req: Request, res: Response) => {
     try {
         const user = await UserDto.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
@@ -76,7 +81,7 @@ UserRouter.post("/users/login", async (req, res) => {
     }
 })
 
-UserRouter.post("/users/logout", authenticate, async (req, res) => {
+UserRouter.post("/users/logout", authenticate, async (req: Request, res: Response) => {
     try {
         req.user.tokens = req.user.tokens.filter((current: JWTToken) => current.token != req.token)
         await req.user.save()
@@ -86,7 +91,7 @@ UserRouter.post("/users/logout", authenticate, async (req, res) => {
     }
 })
 
-UserRouter.post("/users/logoutall", authenticate, async (req, res) => {
+UserRouter.post("/users/logoutall", authenticate, async (req: Request, res: Response) => {
     try {
         req.user.tokens = []
         await req.user.save()
@@ -96,14 +101,42 @@ UserRouter.post("/users/logoutall", authenticate, async (req, res) => {
     }
 })
 
-export { UserRouter }
+UserRouter.post("/users/me/avatar", authenticate, multerOptions.single("avatar"), async (req: Request, res: Response) => {
+    const buffer = await sharp(req.file?.buffer).png().resize({ width: 250, height: 250 }).toBuffer()
 
-class JWTToken {
-    token: string
-    _id: ObjectId
+    req.user.avatar = buffer
+    await req.user.save()
+    res.send()
+},
+    (error: Error, req: Request, res: Response, next: NextFunction) => {
+    const errorMessage = new ErrorResponse(400, error.message)
+    res.status(400).send(errorMessage)
+})
 
-    constructor(token: string, id: ObjectId) {
-        this.token = token;
-        this._id = id;
+UserRouter.delete("/users/me/avatar", authenticate, async (req: Request, res: Response) => {
+    try {
+        req.user.avatar = undefined
+        await req.user.save()
+        res.send()
+    } catch(error) {
+        console.log(error)
+        res.status(500).send(error)
     }
-}
+})
+
+UserRouter.get("/users/:id/avatar", async (req: Request, res: Response) => {
+    try {
+        const user = await UserDto.findById(req.params.id)
+
+        if(!user || !user.avatar) {
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/jpg')
+        res.send(user.avatar)
+    } catch(error) {
+        res.status(404).send()
+    }
+})
+
+export { UserRouter }

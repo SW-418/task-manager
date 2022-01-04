@@ -7,6 +7,7 @@ export interface IUser {
     email: string
     password: string
     tokens: string[]
+    avatar: Buffer
 
     findByCredentials(email: string, password: string): Promise<IUser>
     generateAuthToken(): Promise<string>

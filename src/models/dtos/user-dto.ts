@@ -50,7 +50,10 @@ const schema = new Schema<IUser, UserModel>({
             type: String,
             required: true
         }
-    }]
+    }],
+    avatar: {
+        type: Buffer
+    }
 }, {
     timestamps: true
 });
