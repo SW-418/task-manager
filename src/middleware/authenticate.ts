@@ -8,6 +8,7 @@ const authenticate = async(req: Request, res: Response, next: NextFunction) => {
         if(!token) {
             throw new Error("Auth token not found")
         }
+        const jwtSecret = process.env.JWT_SECRET
         const decoded = jwt.verify(token, "secret") as JwtPayload
         const user = await UserDto.findOne({ _id: decoded["_id"], 'tokens.token': token })
         if(!user) {

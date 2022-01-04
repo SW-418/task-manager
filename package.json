@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc && node ./dist/index.js",
-    "startp": "tsc && node ./dist/playground/promise-chaining.js",
+    "dev": "tsc && PORT=3000 JWT_SECRET=doughnut MONGODB_URL=mongodb://127.0.0.1:27017 node ./dist/index.js",
     "test": "jest"
   },
   "author": "",
