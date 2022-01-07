@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken'
 import validator from 'validator'
 import {IUser} from "../user"
 import bcrypt from 'bcryptjs'
-import {PublicUser} from "../public-user.js";
-import {TaskDto} from "./task-dto.js";
+import {PublicUser} from "../public-user";
+import {TaskDto} from "./task-dto";
 
 const { Schema } = mongoose
 

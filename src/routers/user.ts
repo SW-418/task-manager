@@ -1,9 +1,9 @@
 import express, {NextFunction, Request, Response} from 'express'
-import {authenticate} from '../middleware/authenticate.js';
-import {UserDto} from "../models/dtos/user-dto.js";
+import {authenticate} from '../middleware/authenticate';
+import {UserDto} from "../models/dtos/user-dto";
 import {JWTToken} from "../models/JWTToken";
 import multer from "multer"
-import {ErrorResponse} from "../models/error-response.js";
+import {ErrorResponse} from "../models/error-response";
 import sharp from "sharp";
 
 const UserRouter = express.Router()

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import jwt, { JwtPayload } from 'jsonwebtoken'
-import { UserDto } from "../models/dtos/user-dto.js";
+import { UserDto } from "../models/dtos/user-dto";
 
 const authenticate = async(req: Request, res: Response, next: NextFunction) => {
     try {

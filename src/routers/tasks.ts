@@ -1,6 +1,6 @@
 import express,{ Request, Response } from 'express'
-import { TaskDto } from "../models/dtos/task-dto.js";
-import { authenticate } from "../middleware/authenticate.js";
+import { TaskDto } from "../models/dtos/task-dto";
+import { authenticate } from "../middleware/authenticate";
 import {FilterQuery} from "mongoose";
 import {Task} from "../models/task";
 
