@@ -25,7 +25,7 @@
     "validator": "^13.7.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/express": "^4.17.13",
-    "@types/jest": "^27.0.3",
+    "@types/jest": "^27.4.0",
     "@types/jsonwebtoken": "^8.5.6",
     "@types/multer": "^1.4.7",
     "@types/sharp": "^0.29.5",
